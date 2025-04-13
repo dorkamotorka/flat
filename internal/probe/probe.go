@@ -3,8 +3,10 @@ package probe
 import (
 	"context"
 	"log"
+	"os"
 
-	"github.com/cilium/ebpf/ringbuf"
+	"github.com/cilium/ebpf/perf"
+	//"github.com/cilium/ebpf/ringbuf"
 	"github.com/pouriyajamshidi/flat/clsact"
 	"github.com/pouriyajamshidi/flat/internal/flowtable"
 	"github.com/pouriyajamshidi/flat/internal/packet"
@@ -13,7 +15,7 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-//go:generate go run github.com/cilium/ebpf/cmd/bpf2go probe ../../bpf/flat.c - -O2  -Wall -Werror -Wno-address-of-packed-member
+//go:generate go run github.com/cilium/ebpf/cmd/bpf2go probe ../../bpf/flat_portable.c - -O2  -Wall -Werror -Wno-address-of-packed-member
 
 const tenMegaBytes = 1024 * 1024 * 10
 const twentyMegaBytes = tenMegaBytes * 2
@@ -205,9 +207,9 @@ func Run(ctx context.Context, userInput types.UserInput) error {
 
 	pipe := probe.bpfObjects.probeMaps.Pipe
 
-	reader, err := ringbuf.NewReader(pipe)
+	reader, err := perf.NewReader(pipe, os.Getpagesize())
 	if err != nil {
-		log.Fatalf("opening ringbuf reader: %s", err)
+		log.Fatalf("opening perfbuf reader: %s", err)
 	}
 	defer reader.Close()
 
