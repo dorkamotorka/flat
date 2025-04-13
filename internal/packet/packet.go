@@ -56,6 +56,10 @@ func (pkt *Packet) Hash() uint64 {
 
 // UnmarshalBinary builds and fills up the Packet struct coming from eBPF map
 func UnmarshalBinary(in []byte) (Packet, bool) {
+	if len(in) < 16 {
+    		log.Println("input too short:", len(in))
+    		return Packet{}, ok
+	}
 	srcIP, ok := netip.AddrFromSlice(in[0:16])
 
 	if !ok {
